@@ -92,7 +92,8 @@ function startUploading() {
 
     // get form data for POSTing
     //var vFD = document.getElementById('upload_form').getFormData(); // for FF3
-    var vFD = new FormData("file",document.getElementById('upload_form')); 
+//    var vFD = new FormData(document.getElementById('upload_form')); 
+    var vFD = new FormData($('#upload_form')[0]);
 
     // create XMLHttpRequest object, adding few event listeners, and POSTing our data
     var oXHR = new XMLHttpRequest();        
@@ -103,7 +104,7 @@ function startUploading() {
    
     oXHR.open('POST', '/BigFileUpload/uploadSmallFile'); 
     oXHR.setRequestHeader("fileType", oFile.type);
-    oXHR.send(oFile);
+    oXHR.send(vFD);
 
     // set inner timer
     oTimer = setInterval(doInnerUpdates, 300);
