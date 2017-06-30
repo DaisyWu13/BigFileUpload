@@ -2,7 +2,7 @@
 var iBytesUploaded = 0;
 var iBytesTotal = 0;
 var iPreviousBytesLoaded = 0;
-var iMaxFilesize = 5242880; // 1MB
+var iMaxFilesize = 5242880; // 5MB
 var oTimer = 0;
 var sResultFileSize = '';
 var oFile = null;
@@ -92,7 +92,6 @@ function startUploading() {
 
     // get form data for POSTing
     //var vFD = document.getElementById('upload_form').getFormData(); // for FF3
-//    var vFD = new FormData(document.getElementById('upload_form')); 
     var vFD = new FormData($('#upload_form')[0]);
 
     // create XMLHttpRequest object, adding few event listeners, and POSTing our data
