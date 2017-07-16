@@ -2,6 +2,8 @@
 
 ## Introduction
 To complete a project which can upload files continuously by blocks.
+For now, this project is just a demo, if you have any advice and questions, please feel free to contact me.
+Email: wuhua3090911074@163.com
 
 ## Problems met
 + Q: new FormData(file) and XMLHttpRequest.send(formdata), the post-end servlet accept data by inputstream, but the image data writed down in disk can't be opened caused by the data format incorrect.
