@@ -2,10 +2,14 @@
 var iBytesUploaded = 0;
 var iBytesTotal = 0;
 var iPreviousBytesLoaded = 0;
-var iMaxFilesize = 5242880; // 5MB
+var iMaxFilesize = 52428800; // 50MB
+//var blockSize = 5242880; //5M
+var blockSize = 1048576; //1M
 var oTimer = 0;
 var sResultFileSize = '';
 var oFile = null;
+var fileBlockNum = 0;
+var currentBlockNum = 0;
 
 function secondsToTime(secs) { // we will use this function to convert seconds in normal time format
     var hr = Math.floor(secs / 3600);
@@ -51,6 +55,8 @@ function fileSelected() {
         return;
     }
 
+    //compute the block number of the file to upload
+	fileBlockNum = Math.ceil(oFile.size/blockSize);
     // get preview element
     var oImage = document.getElementById('preview');
 
@@ -77,6 +83,7 @@ function fileSelected() {
     oReader.readAsDataURL(oFile);
 }
 
+//click button to upload
 function startUploading() {
     // cleanup all temp states
     iPreviousBytesLoaded = 0;
@@ -92,21 +99,30 @@ function startUploading() {
 
     // get form data for POSTing
     //var vFD = document.getElementById('upload_form').getFormData(); // for FF3
-    var vFD = new FormData($('#upload_form')[0]);
-
-    // create XMLHttpRequest object, adding few event listeners, and POSTing our data
-    var oXHR = new XMLHttpRequest();        
-    oXHR.upload.addEventListener('progress', uploadProgress, false);
-    oXHR.addEventListener('load', uploadFinish, false);
-    oXHR.addEventListener('error', uploadError, false);
-    oXHR.addEventListener('abort', uploadAbort, false);
-   
-    oXHR.open('POST', '/BigFileUpload/uploadSmallFile'); 
-    oXHR.setRequestHeader("fileType", oFile.type);
-    oXHR.send(vFD);
+    uploadBlock();
 
     // set inner timer
     oTimer = setInterval(doInnerUpdates, 300);
+}
+
+function uploadBlock(){
+	 var start = blockSize*currentBlockNum;
+	 var end = ( blockSize*(currentBlockNum+1) < oFile.size)? blockSize*(currentBlockNum+1):oFile.size;
+	 var formData = new FormData();
+	
+	 formData.append("totalBlocks", fileBlockNum);
+	 formData.append("currentBlockNum",currentBlockNum);
+	 formData.append("fileType", oFile.type);
+	 formData.append("fileName", encodeURI(oFile.name));
+	 formData.append("file", oFile.slice(start, end));
+	 var oXHR = new XMLHttpRequest();        
+	    oXHR.upload.addEventListener('progress', uploadProgress, false);
+	    oXHR.addEventListener('load', uploadFinish, false);
+	    oXHR.addEventListener('error', uploadError, false);
+	    oXHR.addEventListener('abort', uploadAbort, false);
+//	    oXHR.setRequestHeader("fileType", oFile.type);
+	    oXHR.open('POST', '/BigFileUpload/uploadFile'); 
+	    oXHR.send(formData);
 }
 
 function doInnerUpdates() { // we will use this function to display upload speed
@@ -158,13 +174,21 @@ function uploadFinish(e) { // upload successfully finished
     var oUploadResponse = document.getElementById('upload_response');
     oUploadResponse.innerHTML = e.target.responseText;
     oUploadResponse.style.display = 'block';
+	currentBlockNum++;
+    if( currentBlockNum < fileBlockNum)
+    {
+    	uploadBlock();
+    }else
+    {
+    	document.getElementById('progress_percent').innerHTML = '100%';
+    	document.getElementById('progress').style.width = '400px';
+    	document.getElementById('filesize').innerHTML = sResultFileSize;
+    	document.getElementById('remaining').innerHTML = '| 00:00:00';
 
-    document.getElementById('progress_percent').innerHTML = '100%';
-    document.getElementById('progress').style.width = '400px';
-    document.getElementById('filesize').innerHTML = sResultFileSize;
-    document.getElementById('remaining').innerHTML = '| 00:00:00';
+    	clearInterval(oTimer);
+    }
+    
 
-    clearInterval(oTimer);
 }
 
 function uploadError(e) { // upload error

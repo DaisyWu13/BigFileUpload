@@ -18,4 +18,14 @@
   	<servlet-name>AcceptSmallData</servlet-name>
   	<url-pattern>/uploadSmallFile</url-pattern>
   </servlet-mapping>
+  
+    <servlet>
+  	<servlet-name>AcceptData</servlet-name>
+  	<servlet-class>com.util.servlet.AcceptData</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>AcceptData</servlet-name>
+  	<url-pattern>/uploadFile</url-pattern>
+  </servlet-mapping>
+  
 </web-app>
